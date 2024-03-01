@@ -1,0 +1,36 @@
+# Workflow that invokes the crawler
+
+name: CI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+            python-version: '3.8'
+
+      - name: Install robot frawmework and dependent libraries
+        run: |
+            pip install robotframework robotframework-browser
+            python -m Browser.entry init
+
+      - name: Invoke crawl.robot
+        run: |
+            robot -d output crawl.robot
+
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+            name: results
+            path: output
+
